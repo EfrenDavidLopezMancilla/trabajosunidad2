@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html class="theme-light" style="background-color: gainsboro;">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% block title %}{% endblock %}</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@1.0.2/css/bulma.min.css">
+    </head>
+  <body >
+    <header>
+        <br>
+        <h1 class="title has-text-centered is-1">Blog de Noticias</h1>
+        <hr>
+    </header>
+    <div class="container">
+        {% block content %}{% endblock %}
+    </div>
+  </body>
+</html>
