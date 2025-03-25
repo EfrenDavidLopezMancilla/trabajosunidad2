@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+
+{% block title %}Editar Categoría{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="columns is-centered">
+        <div class="column is-6">
+            <div class="box">
+                <h1 class="title is-4">Editar Categoría</h1>
+                
+                <form method="POST" action="{{ url_for('edit_category', id=category.id) }}">
+                    <div class="field">
+                        <label class="label">Nombre</label>
+                        <div class="control">
+                            <input class="input" type="text" name="name" value="{{ category.name }}" required>
+                        </div>
+                    </div>
+                    
+                    <div class="field is-grouped">
+                        <div class="control">
+                            <button type="submit" class="button is-info">Actualizar</button>
+                        </div>
+                        <div class="control">
+                            <a href="{{ url_for('list_categories') }}" class="button is-light">Cancelar</a>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

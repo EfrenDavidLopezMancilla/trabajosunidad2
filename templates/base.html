@@ -1,23 +1,83 @@
-<<<<<<< HEAD
-<h2 class="subtitle has-text-centered is-4">Lo más reciente en México</h2>
-=======
 <!DOCTYPE html>
-<html class="theme-light" style="background-color: gainsboro;">
-  <head>
-    <meta charset="utf-8">
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>{% block title %}{% endblock %}</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@1.0.2/css/bulma.min.css">
-    </head>
-  <body >
-    <header>
-        <br>
-        <h1 class="title has-text-centered is-1">Blog de Noticias</h1>
-        <hr>
-    </header>
-    <div class="container">
-        {% block content %}{% endblock %}
-    </div>
-  </body>
+    <title>{% block title %}Blog de Noticias{% endblock %}</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.3/css/bulma.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .navbar-item img {
+            max-height: 2.5rem;
+        }
+        body {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        .main-content {
+            flex: 1;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar is-info" role="navigation" aria-label="main navigation">
+        <div class="navbar-brand">
+            <a class="navbar-item" href="{{ url_for('home') }}">
+                <i class="fas fa-newspaper"></i>&nbsp; <strong>Noticias MX</strong>
+            </a>
+        </div>
+
+        <div class="navbar-menu">
+            <div class="navbar-start">
+                <a class="navbar-item" href="{{ url_for('home') }}">
+                    <i class="fas fa-home"></i>&nbsp; Inicio
+                </a>
+                <a class="navbar-item" href="{{ url_for('list_posts') }}">
+                    <i class="fas fa-newspaper"></i>&nbsp; Noticias
+                </a>
+                <a class="navbar-item" href="{{ url_for('list_categories') }}">
+                    <i class="fas fa-tags"></i>&nbsp; Categorías
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <section class="section main-content">
+        <div class="container">
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                    <div class="notification is-{{ category }}">
+                        <button class="delete"></button>
+                        {{ message }}
+                    </div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+
+            {% block content %}{% endblock %}
+        </div>
+    </section>
+
+    <footer class="footer">
+        <div class="content has-text-centered">
+            <p>
+                <strong>Blog de Noticias</strong> &copy; 2023
+            </p>
+        </div>
+    </footer>
+
+    <script>
+        // Cerrar notificaciones
+        document.addEventListener('DOMContentLoaded', () => {
+            (document.querySelectorAll('.notification .delete') || []).forEach(($delete) => {
+                $notification = $delete.parentNode;
+                $delete.addEventListener('click', () => {
+                    $notification.parentNode.removeChild($notification);
+                });
+            });
+        });
+    </script>
+</body>
 </html>
->>>>>>> feature/02/19590341
