@@ -20,7 +20,13 @@
                         <!-- Título del post -->
                         <p class="title is-4">{{ post.title }}</p>
                         <!-- Categoría del post -->
+<<<<<<< HEAD
                         <p class="subtitle is-5">{{ post.category.name }}</p>
+=======
+                        {% if post.category %}
+                        <p class="subtitle is-5">{{ post.category.name }}</p>
+                        {% endif %}
+>>>>>>> feature/02/19590341
                     </div>
                 </div>
 
