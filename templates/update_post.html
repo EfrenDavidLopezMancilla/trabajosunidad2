@@ -1,95 +1,58 @@
 {% extends 'base.html' %}
-<<<<<<< HEAD
-{% block title%} Blog de Noticias{% endblock %}
-{% block content%}
-=======
+
 {% block title %}Actualizar Post{% endblock %}
+
 {% block content %}
->>>>>>> feature/02/19590341
 <div class="columns">
     <div class="column is-offset-3 is-6">
         <div class="card">
             <div class="card-content">
-                <div class="media">
-                    <div class="media-content">
-<<<<<<< HEAD
-                        <p class="title is-4">Agregar Post</p>
+                <form method="POST" action="{{ url_for('update_post', id=post.id) }}">
+                    <!-- Campo de título -->
+                    <div class="field">
+                        <label class="label">Título</label>
+                        <div class="control">
+                            <input class="input" type="text" name="title" value="{{ post.title }}" required>
+                        </div>
                     </div>
-                </div>
-                <div class="content">
-                    <form action="{{ url_for('update_post', id = post.id) }}" method="post">
-                        <div class="field">
-                            <label class="label">Titulo:</label>
-                            <div class="control">
-                                <input class="input" type="text" name='title' value="{{post.title}}">
+                    
+                    <!-- Selector de categoría -->
+                    <div class="field">
+                        <label class="label">Categoría</label>
+                        <div class="control">
+                            <div class="select">
+                                <select name="category_id">
+                                    {% for category in categories %}
+                                    <option value="{{ category.id }}" 
+                                        {% if category.id == post.category_id %}selected{% endif %}>
+                                        {{ category.name }}
+                                    </option>
+                                    {% endfor %}  <!-- ¡Cierre del for! -->
+                                </select>
                             </div>
                         </div>
-                        <div class="field">
-                            <label class="label">Categoria:</label>
-                            <div class="control">
-                                <div class="select">
-                                    <select name="category_id">
-                                        {% for category in categories %}
-                                        <option value="{{ category.id }}" {% if category.id == post.category_id %}selected{% endif %}>
-=======
-                        <p class="title is-4">Actualizar Post</p>
                     </div>
-                </div>
-                <div class="content">
-                    <form action="{{ url_for('update_post', id=post.id) }}" method="post">
-                        <div class="field">
-                            <label class="label">Título:</label>
-                            <div class="control">
-                                <input class="input" type="text" name="title" value="{{ post.title }}" required>
-                            </div>
+                    
+                    <!-- Campo de contenido -->
+                    <div class="field">
+                        <label class="label">Contenido</label>
+                        <div class="control">
+                            <textarea class="textarea" name="content" required>{{ post.content }}</textarea>
                         </div>
-                        <div class="field">
-                            <label class="label">Categoría:</label>
-                            <div class="control">
-                                <div class="select">
-                                    <select name="category_id">
-                                        <option value="">Sin categoría</option>
-                                        {% for category in categories %}
-                                        <option value="{{ category.id }}" 
-                                            {% if post.category_id == category.id %}selected{% endif %}>
->>>>>>> feature/02/19590341
-                                            {{ category.name }}
-                                        </option>
-                                        {% endfor %}
-                                    </select>
-                                </div>
-                            </div>
+                    </div>
+                    
+                    <!-- Botones -->
+                    <div class="field is-grouped">
+                        <div class="control">
+                            <button type="submit" class="button is-link">Actualizar</button>
                         </div>
-                        <div class="field">
-                            <label class="label">Contenido:</label>
-                            <div class="control">
-<<<<<<< HEAD
-                                <textarea class="textarea" name="content" >{{post.content}}</textarea>
-                            </div>
+                        <div class="control">
+                            <a href="{{ url_for('list_posts') }}" class="button is-danger is-light">Cancelar</a>
                         </div>
-                        <button class="button is-success " type="submit">Actualizar</button>
-                        <a class="button is-danger" href="{{ url_for('index') }}">Cancelar</a>
-=======
-                                <textarea class="textarea" name="content" required>{{ post.content }}</textarea>
-                            </div>
-                        </div>
-                        <div class="field is-grouped">
-                            <div class="control">
-                                <button class="button is-link" type="submit">Actualizar</button>
-                            </div>
-                            <div class="control">
-                                <a href="{{ url_for('index') }}" class="button is-danger is-light">Cancelar</a>
-                            </div>
-                        </div>
->>>>>>> feature/02/19590341
-                    </form>
-                </div>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
 </div>
-<<<<<<< HEAD
-{% endblock%}
-=======
-{% endblock %}
->>>>>>> feature/02/19590341
+{% endblock %}  <!-- Espacio después de endblock -->
