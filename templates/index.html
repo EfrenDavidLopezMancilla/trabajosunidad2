@@ -20,7 +20,9 @@
                         <!-- Título del post -->
                         <p class="title is-4">{{ post.title }}</p>
                         <!-- Categoría del post -->
+                        {% if post.category %}
                         <p class="subtitle is-5">{{ post.category.name }}</p>
+                        {% endif %}
                     </div>
                 </div>
 

@@ -1,5 +1,5 @@
 import os
-from flask import Flask, request, jsonify, render_template, redirect, url_for
+from flask import Flask, request, render_template, redirect, url_for, flash
 from flask_sqlalchemy import SQLAlchemy
 from dotenv import load_dotenv
 
@@ -8,6 +8,7 @@ load_dotenv()
 
 # Crear instancia de Flask
 app = Flask(__name__)
+app.secret_key = os.getenv('SECRET_KEY') or 'una-clave-secreta-muy-segura'
 
 # Configuración de la base de datos PostgreSQL
 app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL')
@@ -35,56 +36,56 @@ class Post(db.Model):
 @app.route('/')
 def index():
     posts = Post.query.all()
-    categories = Category.query.all()
-    return render_template('index.html', posts=posts, categories=categories)
+    return render_template('index.html', posts=posts)
 
 # Ruta para crear un nuevo post
 @app.route('/post/new', methods=['GET', 'POST'])
 def add_post():
     if request.method == 'POST':
-        # Obtener los datos del formulario
         title = request.form['title']
         content = request.form['content']
         category_id = request.form.get('category_id')
-
-        # Crear un nuevo post
-        new_post = Post(title=title, content=content, category_id=category_id)
+        
+        if not title or not content:
+            flash('Título y contenido son requeridos', 'error')
+            return redirect(url_for('add_post'))
+            
+        new_post = Post(title=title, content=content, category_id=category_id if category_id else None)
         db.session.add(new_post)
         db.session.commit()
-
-        # Redirigir a la página principal
+        flash('Post creado exitosamente', 'success')
         return redirect(url_for('index'))
 
-    # Si es una solicitud GET, mostrar el formulario para crear un post
     categories = Category.query.all()
     return render_template('create_post.html', categories=categories)
 
 # Ruta para actualizar un post
 @app.route('/post/update/<int:id>', methods=['GET', 'POST'])
 def update_post(id):
-    post = Post.query.get_or_404(id)  # Obtener el post o devolver un error 404 si no existe
+    post = Post.query.get_or_404(id)
     if request.method == 'POST':
-        # Actualizar los datos del post con los valores del formulario
         post.title = request.form['title']
         post.content = request.form['content']
         post.category_id = request.form.get('category_id')
         db.session.commit()
+        flash('Post actualizado exitosamente', 'success')
         return redirect(url_for('index'))
 
-    # Si es una solicitud GET, mostrar el formulario de actualización
     categories = Category.query.all()
     return render_template('update_post.html', post=post, categories=categories)
 
 # Ruta para eliminar un post
 @app.route('/post/delete/<int:id>')
 def delete_post(id):
-    post = Post.query.get_or_404(id)  # Obtener el post o devolver un error 404 si no existe
+    post = Post.query.get_or_404(id)
     db.session.delete(post)
     db.session.commit()
+    flash('Post eliminado exitosamente', 'success')
     return redirect(url_for('index'))
 
-# Ejecutar la aplicación
+# Crear tablas al inicio
+with app.app_context():
+    db.create_all()
+
 if __name__ == '__main__':
-    with app.app_context():
-        db.create_all()  # Crear las tablas en la base de datos (si no existen)
     app.run(debug=True)
