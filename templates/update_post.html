@@ -8,7 +8,6 @@
         <div class="card">
             <div class="card-content">
                 <form method="POST" action="{{ url_for('update_post', id=post.id) }}">
-                    <!-- Campo de título -->
                     <div class="field">
                         <label class="label">Título</label>
                         <div class="control">
@@ -16,24 +15,23 @@
                         </div>
                     </div>
                     
-                    <!-- Selector de categoría -->
                     <div class="field">
                         <label class="label">Categoría</label>
                         <div class="control">
                             <div class="select">
-                                <select name="category_id">
+                                <select name="category_id" required>
+                                    <option value="">Seleccione una categoría</option>
                                     {% for category in categories %}
                                     <option value="{{ category.id }}" 
                                         {% if category.id == post.category_id %}selected{% endif %}>
                                         {{ category.name }}
                                     </option>
-                                    {% endfor %}  <!-- ¡Cierre del for! -->
+                                    {% endfor %}
                                 </select>
                             </div>
                         </div>
                     </div>
                     
-                    <!-- Campo de contenido -->
                     <div class="field">
                         <label class="label">Contenido</label>
                         <div class="control">
@@ -41,13 +39,12 @@
                         </div>
                     </div>
                     
-                    <!-- Botones -->
                     <div class="field is-grouped">
                         <div class="control">
                             <button type="submit" class="button is-link">Actualizar</button>
                         </div>
                         <div class="control">
-                            <a href="{{ url_for('list_posts') }}" class="button is-danger is-light">Cancelar</a>
+                            <a href="{{ url_for('list_posts') }}" class="button is-light">Cancelar</a>
                         </div>
                     </div>
                 </form>
@@ -55,4 +52,4 @@
         </div>
     </div>
 </div>
-{% endblock %}  <!-- Espacio después de endblock -->
+{% endblock %}

@@ -20,36 +20,38 @@
                         <!-- Título del post -->
                         <p class="title is-4">{{ post.title }}</p>
                         <!-- Categoría del post -->
-
-                        <p class="subtitle is-5">{{ post.category.name }}</p>
-
                         {% if post.category %}
-                        <p class="subtitle is-5">{{ post.category.name }}</p>
+                        <span class="tag is-info">{{ post.category.name }}</span>
+                        {% else %}
+                        <span class="tag is-light">Sin categoría</span>
                         {% endif %}
-
                     </div>
                 </div>
 
                 <!-- Contenido del post -->
                 <div class="content">
                     {{ post.content }}
+                    <br>
+                    <small>Creado el: {{ post.id|datetimeformat }}</small>
                 </div>
 
-                <!-- Botones de acciones (Actualizar y Eliminar) -->
+                <!-- Botones de acciones -->
                 <div class="buttons">
-                    <!-- Botón para actualizar el post -->
                     <a href="{{ url_for('update_post', id=post.id) }}" class="button is-small is-link is-outlined">
-                        <i class="fa-solid fa-pen-to-square"></i> &nbsp; Actualizar
+                        <i class="fa-solid fa-pen-to-square"></i> &nbsp; Editar
                     </a>
-
-                    <!-- Botón para eliminar el post -->
-                    <a href="{{ url_for('delete_post', id=post.id) }}" class="button is-small is-danger is-outlined">
+                    <a href="{{ url_for('delete_post', id=post.id) }}" class="button is-small is-danger is-outlined"
+                       onclick="return confirm('¿Estás seguro de eliminar este post?')">
                         <i class="fa-solid fa-trash"></i> &nbsp; Eliminar
                     </a>
                 </div>
             </div>
         </div>
-        <br> <!-- Espacio entre posts -->
+        <br>
+        {% else %}
+        <div class="notification is-warning">
+            No hay posts disponibles. ¡Crea el primero!
+        </div>
         {% endfor %}
     </div>
 </div>
