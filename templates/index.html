@@ -32,7 +32,7 @@
                 <div class="content">
                     {{ post.content }}
                     <br>
-                    <small>Creado el: {{ post.id|datetimeformat }}</small>
+                    <small>Creado el: {{ post.created_at.strftime('%Y-%m-%d %H:%M') }}</small>
                 </div>
 
                 <!-- Botones de acciones -->

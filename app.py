@@ -2,9 +2,8 @@ import os
 from flask import Flask, render_template, redirect, url_for, flash, request
 from flask_sqlalchemy import SQLAlchemy
 from dotenv import load_dotenv
-import ssl
+from datetime import datetime
 from urllib.parse import urlparse
-import psycopg2
 
 # Cargar variables de entorno
 load_dotenv()
@@ -12,25 +11,17 @@ load_dotenv()
 app = Flask(__name__)
 app.secret_key = os.getenv('SECRET_KEY')
 
-# Configuración SSL personalizada
-ssl_context = ssl.create_default_context()
-ssl_context.check_hostname = False
-ssl_context.verify_mode = ssl.CERT_NONE
-
 # Configuración de la base de datos
 db_uri = os.getenv('DATABASE_URL')
 
-# Parsear la URL para asegurar el formato correcto
-parsed_uri = urlparse(db_uri)
-if parsed_uri.scheme == 'postgres':
-    db_uri = db_uri.replace('postgres://', 'postgresql://', 1)
+# Asegurar que la URL comience con postgresql://
+if db_uri and db_uri.startswith("postgres://"):
+    db_uri = db_uri.replace("postgres://", "postgresql://", 1)
 
 app.config['SQLALCHEMY_DATABASE_URI'] = db_uri
 app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
     'connect_args': {
-        'sslmode': 'require',
-        'sslrootcert': os.path.join(os.path.dirname(__file__), 'cert.pem'),
-        'ssl': ssl_context
+        'sslmode': 'require'
     },
     'pool_pre_ping': True,
     'pool_recycle': 300,
@@ -55,6 +46,7 @@ class Post(db.Model):
     title = db.Column(db.String(200), nullable=False)
     content = db.Column(db.Text, nullable=False)
     category_id = db.Column(db.Integer, db.ForeignKey('categories.id'), nullable=True)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
 # Rutas principales
 @app.route('/')
@@ -216,38 +208,18 @@ def delete_category(id):
         flash(f'Error al eliminar la categoría: {str(e)}', 'error')
     return redirect(url_for('list_categories'))
 
-# Función para verificar la conexión
-def check_db_connection():
-    try:
-        conn = psycopg2.connect(
-            dbname="tiendaderopa_0qmi",
-            user="tiendaderopa_0qmi_user",
-            password="uHwjed0A3URri4b1CGigVz13B3UMHj8d",
-            host="dpg-d0h5nq63jp1c73fik060-a.oregon-postgres.render.com",
-            port="5432",
-            sslmode="require"
-        )
-        conn.close()
-        return True
-    except Exception as e:
-        print(f"Error de conexión: {str(e)}")
-        return False
-
 # Inicialización de la base de datos
 def init_db():
     try:
         with app.app_context():
-            if check_db_connection():
-                db.create_all()
-                # Crear categorías por defecto si no existen
-                if Category.query.count() == 0:
-                    default_categories = ['General', 'Tecnología', 'Deportes', 'Entretenimiento']
-                    for cat_name in default_categories:
-                        db.session.add(Category(name=cat_name))
-                    db.session.commit()
-                print("✅ Base de datos inicializada correctamente")
-            else:
-                print("❌ No se pudo conectar a la base de datos")
+            db.create_all()
+            # Crear categorías por defecto si no existen
+            if Category.query.count() == 0:
+                default_categories = ['General', 'Tecnología', 'Deportes', 'Entretenimiento']
+                for cat_name in default_categories:
+                    db.session.add(Category(name=cat_name))
+                db.session.commit()
+            print("✅ Base de datos inicializada correctamente")
     except Exception as e:
         print(f"❌ Error al inicializar la base de datos: {str(e)}")
 
