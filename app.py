@@ -1,4 +1,5 @@
 import os
+import ssl
 from flask import Flask, render_template, redirect, url_for, flash, request
 from flask_sqlalchemy import SQLAlchemy
 from dotenv import load_dotenv
@@ -9,31 +10,42 @@ from urllib.parse import urlparse
 load_dotenv()
 
 app = Flask(__name__)
-app.secret_key = os.getenv('SECRET_KEY')
+app.secret_key = os.getenv('SECRET_KEY', 'una-clave-secreta-muy-segura')
 
-# Configuración de la base de datos
-db_uri = os.getenv('DATABASE_URL')
+# =============================================
+# CONFIGURACIÓN DE LA BASE DE DATOS (PostgreSQL)
+# =============================================
 
 # Asegurar que la URL comience con postgresql://
+db_uri = os.getenv('DATABASE_URL')
 if db_uri and db_uri.startswith("postgres://"):
     db_uri = db_uri.replace("postgres://", "postgresql://", 1)
+
+# Configuración de SSL para Render.com
+ssl_context = ssl.create_default_context()
+ssl_context.check_hostname = False
+ssl_context.verify_mode = ssl.CERT_NONE
 
 app.config['SQLALCHEMY_DATABASE_URI'] = db_uri
 app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
     'connect_args': {
-        'sslmode': 'require'
+        'sslmode': 'require',
+        'ssl': ssl_context
     },
-    'pool_pre_ping': True,
-    'pool_recycle': 300,
-    'pool_size': 5,
-    'max_overflow': 10,
-    'pool_timeout': 30
+    'pool_pre_ping': True,  # Verifica conexiones antes de usarlas
+    'pool_recycle': 300,    # Recicla conexiones cada 300 segundos
+    'pool_size': 5,         # Número máximo de conexiones en el pool
+    'max_overflow': 10,     # Conexiones adicionales si el pool está lleno
+    'pool_timeout': 30      # Tiempo de espera para obtener una conexión
 }
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
 
-# Modelos
+# =============================================
+# MODELOS DE LA BASE DE DATOS
+# =============================================
+
 class Category(db.Model):
     __tablename__ = 'categories'
     id = db.Column(db.Integer, primary_key=True)
@@ -48,7 +60,10 @@ class Post(db.Model):
     category_id = db.Column(db.Integer, db.ForeignKey('categories.id'), nullable=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
-# Rutas principales
+# =============================================
+# RUTAS PRINCIPALES
+# =============================================
+
 @app.route('/')
 def home():
     return render_template('home.html')
@@ -56,13 +71,16 @@ def home():
 @app.route('/index')
 def index():
     try:
-        posts = Post.query.order_by(Post.id.desc()).all()
+        posts = Post.query.order_by(Post.created_at.desc()).all()
         return render_template('index.html', posts=posts)
     except Exception as e:
         flash(f"Error al cargar los posts: {str(e)}", "error")
         return render_template('index.html', posts=[])
 
-# Rutas para Posts
+# =============================================
+# RUTAS PARA POSTS
+# =============================================
+
 @app.route('/posts')
 def list_posts():
     return index()
@@ -129,7 +147,10 @@ def delete_post(id):
         flash(f'Error al eliminar el post: {str(e)}', 'error')
     return redirect(url_for('list_posts'))
 
-# Rutas para Categorías
+# =============================================
+# RUTAS PARA CATEGORÍAS
+# =============================================
+
 @app.route('/categories')
 def list_categories():
     try:
@@ -208,7 +229,10 @@ def delete_category(id):
         flash(f'Error al eliminar la categoría: {str(e)}', 'error')
     return redirect(url_for('list_categories'))
 
-# Inicialización de la base de datos
+# =============================================
+# INICIALIZACIÓN DE LA BASE DE DATOS
+# =============================================
+
 def init_db():
     try:
         with app.app_context():
@@ -222,6 +246,10 @@ def init_db():
             print("✅ Base de datos inicializada correctamente")
     except Exception as e:
         print(f"❌ Error al inicializar la base de datos: {str(e)}")
+
+# =============================================
+# EJECUCIÓN DE LA APLICACIÓN
+# =============================================
 
 if __name__ == '__main__':
     init_db()
