@@ -8,10 +8,10 @@ load_dotenv()
 
 # Crear instancia de Flask
 app = Flask(__name__)
-app.secret_key = os.getenv('SECRET_KEY') or 'una-clave-secreta-muy-segura'
+app.secret_key = os.getenv('SECRET_KEY')
 
 # Configuración de la base de datos
-app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL', 'sqlite:///blog.db').replace('postgres://', 'postgresql://')
+app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 # Crear instancia de SQLAlchemy
@@ -22,7 +22,7 @@ class Category(db.Model):
     __tablename__ = 'categories'
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False, unique=True)
-    posts = db.relationship('Post', backref='category_ref', lazy=True)
+    posts = db.relationship('Post', backref='category', lazy=True)
 
 class Post(db.Model):
     __tablename__ = 'posts'
@@ -30,19 +30,22 @@ class Post(db.Model):
     title = db.Column(db.String(200), nullable=False)
     content = db.Column(db.Text, nullable=False)
     category_id = db.Column(db.Integer, db.ForeignKey('categories.id'), nullable=True)
-    category = db.relationship('Category', backref=db.backref('post_ref', lazy=True))
 
 # Rutas principales
 @app.route('/')
 def home():
     return render_template('home.html')
 
+@app.route('/index')
+def index():
+    posts = Post.query.all()
+    return render_template('index.html', posts=posts)
+
 # Rutas para Posts
 @app.route('/posts')
 def list_posts():
     posts = Post.query.all()
-    categories = Category.query.all()
-    return render_template('index.html', posts=posts, categories=categories)
+    return render_template('index.html', posts=posts)
 
 @app.route('/post/new', methods=['GET', 'POST'])
 def add_post():
@@ -62,7 +65,7 @@ def add_post():
         return redirect(url_for('list_posts'))
 
     categories = Category.query.all()
-    return render_template('create_post.html', categories=categories)
+    return render_template('add_post.html', categories=categories)
 
 @app.route('/post/update/<int:id>', methods=['GET', 'POST'])
 def update_post(id):
@@ -141,7 +144,7 @@ def delete_category(id):
     category = Category.query.get_or_404(id)
     
     # Verificar si hay posts asociados
-    if category.post_ref:
+    if Post.query.filter_by(category_id=id).first():
         flash('No se puede eliminar: hay posts asociados a esta categoría', 'error')
         return redirect(url_for('list_categories'))
         
