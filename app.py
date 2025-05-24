@@ -2,16 +2,29 @@ import os
 from flask import Flask, request, render_template, redirect, url_for, flash
 from flask_sqlalchemy import SQLAlchemy
 from dotenv import load_dotenv
+import ssl
 
 # Cargar las variables de entorno
 load_dotenv()
 
 # Crear instancia de Flask
 app = Flask(__name__)
-app.secret_key = os.getenv('SECRET_KEY')
+app.secret_key = os.getenv('SECRET_KEY') or 'una-clave-secreta-muy-segura'
 
 # Configuración de la base de datos
-app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL')
+db_uri = os.getenv('DATABASE_URL')
+
+# Asegurar que la URL comience con postgresql://
+if db_uri and db_uri.startswith("postgres://"):
+    db_uri = db_uri.replace("postgres://", "postgresql://", 1)
+
+app.config['SQLALCHEMY_DATABASE_URI'] = db_uri
+app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
+    'connect_args': {
+        'sslmode': 'require',
+        'sslrootcert': os.path.join(os.path.dirname(__file__), 'cert.pem')  # Opcional para SSL
+    }
+}
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 # Crear instancia de SQLAlchemy
@@ -60,9 +73,13 @@ def add_post():
             
         new_post = Post(title=title, content=content, category_id=category_id if category_id else None)
         db.session.add(new_post)
-        db.session.commit()
-        flash('Post creado exitosamente', 'success')
-        return redirect(url_for('list_posts'))
+        try:
+            db.session.commit()
+            flash('Post creado exitosamente', 'success')
+            return redirect(url_for('list_posts'))
+        except Exception as e:
+            db.session.rollback()
+            flash(f'Error al crear el post: {str(e)}', 'error')
 
     categories = Category.query.all()
     return render_template('add_post.html', categories=categories)
@@ -74,9 +91,13 @@ def update_post(id):
         post.title = request.form['title']
         post.content = request.form['content']
         post.category_id = request.form.get('category_id')
-        db.session.commit()
-        flash('Post actualizado exitosamente', 'success')
-        return redirect(url_for('list_posts'))
+        try:
+            db.session.commit()
+            flash('Post actualizado exitosamente', 'success')
+            return redirect(url_for('list_posts'))
+        except Exception as e:
+            db.session.rollback()
+            flash(f'Error al actualizar el post: {str(e)}', 'error')
 
     categories = Category.query.all()
     return render_template('update_post.html', post=post, categories=categories)
@@ -84,9 +105,13 @@ def update_post(id):
 @app.route('/post/delete/<int:id>')
 def delete_post(id):
     post = Post.query.get_or_404(id)
-    db.session.delete(post)
-    db.session.commit()
-    flash('Post eliminado exitosamente', 'success')
+    try:
+        db.session.delete(post)
+        db.session.commit()
+        flash('Post eliminado exitosamente', 'success')
+    except Exception as e:
+        db.session.rollback()
+        flash(f'Error al eliminar el post: {str(e)}', 'error')
     return redirect(url_for('list_posts'))
 
 # Rutas para Categorías
@@ -110,9 +135,13 @@ def add_category():
             
         new_category = Category(name=name)
         db.session.add(new_category)
-        db.session.commit()
-        flash('Categoría creada exitosamente', 'success')
-        return redirect(url_for('list_categories'))
+        try:
+            db.session.commit()
+            flash('Categoría creada exitosamente', 'success')
+            return redirect(url_for('list_categories'))
+        except Exception as e:
+            db.session.rollback()
+            flash(f'Error al crear la categoría: {str(e)}', 'error')
 
     return render_template('add_category.html')
 
@@ -133,9 +162,13 @@ def edit_category(id):
             return redirect(url_for('edit_category', id=id))
             
         category.name = name
-        db.session.commit()
-        flash('Categoría actualizada exitosamente', 'success')
-        return redirect(url_for('list_categories'))
+        try:
+            db.session.commit()
+            flash('Categoría actualizada exitosamente', 'success')
+            return redirect(url_for('list_categories'))
+        except Exception as e:
+            db.session.rollback()
+            flash(f'Error al actualizar la categoría: {str(e)}', 'error')
 
     return render_template('edit_category.html', category=category)
 
@@ -148,14 +181,24 @@ def delete_category(id):
         flash('No se puede eliminar: hay posts asociados a esta categoría', 'error')
         return redirect(url_for('list_categories'))
         
-    db.session.delete(category)
-    db.session.commit()
-    flash('Categoría eliminada exitosamente', 'success')
+    try:
+        db.session.delete(category)
+        db.session.commit()
+        flash('Categoría eliminada exitosamente', 'success')
+    except Exception as e:
+        db.session.rollback()
+        flash(f'Error al eliminar la categoría: {str(e)}', 'error')
     return redirect(url_for('list_categories'))
 
-# Inicialización
-with app.app_context():
-    db.create_all()
+# Inicialización de la base de datos
+def init_db():
+    with app.app_context():
+        try:
+            db.create_all()
+            print("Tablas creadas exitosamente")
+        except Exception as e:
+            print(f"Error al crear tablas: {str(e)}")
 
 if __name__ == '__main__':
+    init_db()
     app.run(debug=True)
