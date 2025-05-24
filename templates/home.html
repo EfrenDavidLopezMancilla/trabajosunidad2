@@ -1,67 +1,72 @@
 {% extends 'base.html' %}
 
-{% block title %}Panel de Control{% endblock %}
+{% block title %}Blog de Noticias Jenkis{% endblock %}
 
 {% block content %}
 <div class="container">
     <div class="columns is-centered">
-        <div class="column is-10">
-            <br>
-            <div class="box has-background-white-ter">
-                <h1 class="title is-4 has-text-centered">Panel de Administración</h1>
-                
-                <div class="columns is-multiline is-centered">
-                    <!-- Módulo Noticias -->
-                    <div class="column is-6">
-                        <div class="box has-background-white">
-                            <div class="media">
-                                <div class="media-left">
-                                    <span class="icon is-large has-text-info">
-                                        <i class="fas fa-newspaper fa-2x"></i>
-                                    </span>
-                                </div>
-                                <div class="media-content">
-                                    <p class="title is-5">Administrar Noticias</p>
-                                    <p class="subtitle is-6">CRUD completo de artículos</p>
+        <div class="column is-8">
+            <!-- Encabezado -->
+            <section class="hero is-primary">
+                <div class="hero-body">
+                    <div class="container">
+                        <h1 class="title is-2">Blog de Noticias Jenkis con kubectl 1.6</h1>
+                        <h2 class="subtitle">Lo más reciente en México en la universidad</h2>
+                    </div>
+                </div>
+            </section>
+
+            <hr>
+
+            <!-- Panel Principal -->
+            <section class="section">
+                <h2 class="title is-3 has-text-centered">Panel Principal</h2>
+                <p class="subtitle has-text-centered">Gestiona las noticias y categorías de manera sencilla</p>
+
+                <div class="columns is-centered mt-5">
+                    <!-- Administrar Noticias -->
+                    <div class="column is-5">
+                        <div class="card">
+                            <header class="card-header">
+                                <p class="card-header-title is-size-4">
+                                    Administrar Noticias
+                                </p>
+                            </header>
+                            <div class="card-content">
+                                <div class="content">
+                                    <p>Crear, modificar y eliminar</p>
                                 </div>
                             </div>
-                            <div class="has-text-centered mt-4">
-                                <a class="button is-info is-rounded" href="{{ url_for('list_posts') }}">
-                                    <span>Acceder</span>
-                                    <span class="icon">
-                                        <i class="fas fa-arrow-right"></i>
-                                    </span>
+                            <footer class="card-footer">
+                                <a href="{{ url_for('list_posts') }}" class="card-footer-item button is-primary">
+                                    Acceder
                                 </a>
-                            </div>
+                            </footer>
                         </div>
                     </div>
 
-                    <!-- Módulo Categorías -->
-                    <div class="column is-6">
-                        <div class="box has-background-white">
-                            <div class="media">
-                                <div class="media-left">
-                                    <span class="icon is-large has-text-success">
-                                        <i class="fas fa-tags fa-2x"></i>
-                                    </span>
-                                </div>
-                                <div class="media-content">
-                                    <p class="title is-5">Administrar Categorías</p>
-                                    <p class="subtitle is-6">Gestión de taxonomías</p>
+                    <!-- Administrar Categorías -->
+                    <div class="column is-5">
+                        <div class="card">
+                            <header class="card-header">
+                                <p class="card-header-title is-size-4">
+                                    Administrar Categorías
+                                </p>
+                            </header>
+                            <div class="card-content">
+                                <div class="content">
+                                    <p>Crear, modificar y eliminar</p>
                                 </div>
                             </div>
-                            <div class="has-text-centered mt-4">
-                                <a class="button is-success is-rounded" href="{{ url_for('list_categories') }}">
-                                    <span>Acceder</span>
-                                    <span class="icon">
-                                        <i class="fas fa-arrow-right"></i>
-                                    </span>
+                            <footer class="card-footer">
+                                <a href="{{ url_for('list_categories') }}" class="card-footer-item button is-primary">
+                                    Acceder
                                 </a>
-                            </div>
+                            </footer>
                         </div>
                     </div>
                 </div>
-            </div>
+            </section>
         </div>
     </div>
 </div>
