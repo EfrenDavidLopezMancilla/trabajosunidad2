@@ -1,0 +1,38 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: blogtec_db
+    environment:
+      POSTGRES_USER: tiendaderopa_0qmi_user
+      POSTGRES_PASSWORD: u#wjed0A3URr14b1C6igVz13B3UWHj8d
+      POSTGRES_DB: blogtec_db
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U tiendaderopa_0qmi_user"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  web:
+    build: .
+    container_name: blogtec_app
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql://tiendaderopa_0qmi_user:u#wjed0A3URr14b1C6igVz13B3UWHj8d@postgres:5432/blogtec_db?sslmode=disable
+      FLASK_ENV: production
+    ports:
+      - "5000:5000"
+    restart: unless-stopped
+    volumes:
+      - .:/app
+    command: ["gunicorn", "--bind", "0.0.0.0:5000", "--workers", "4", "app:app"]
+
+volumes:
+  postgres_data:
